@@ -1,0 +1,13 @@
+streamlit
+spacy
+nltk
+pypdf2
+pdfplumber
+python-docx
+openai
+pandas
+plotly
+reportlab
+python-dotenv
+jsonpickle
+googletrans==4.0.0-rc1

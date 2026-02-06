@@ -189,8 +189,16 @@ Railway automatically detects the Dockerfile and deploys your application.
    - spaCy model download can take time
    - Consider using a pre-built image or caching layers
 
+6. **502 Bad Gateway errors:**
+   - Check Railway logs for startup errors
+   - Ensure `OPENAI_API_KEY` is set in Railway environment variables
+   - Verify the application is starting correctly (check logs)
+   - The health check may take up to 60 seconds on first start
+   - Ensure all dependencies are installed (spaCy model, NLTK data)
+   - Check if the port is correctly configured (should use Railway's PORT env var)
+
 **Health Check:**
-The application includes a health check endpoint at `/_stcore/health` for monitoring.
+The application includes a health check endpoint at `/_stcore/health` for monitoring. The health check waits 60 seconds before starting to allow the app to fully initialize.
 
 ### Data Persistence
 

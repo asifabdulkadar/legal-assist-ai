@@ -8,6 +8,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
@@ -34,9 +35,9 @@ RUN mkdir -p data/storage data/templates logs
 # Expose Streamlit port (Railway will set PORT env var)
 EXPOSE 8501
 
-# Health check (uses default port 8501, Railway maps PORT automatically)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl --fail http://localhost:8501/_stcore/health || exit 1
+# Health check (uses PORT env var or defaults to 8501)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD sh -c 'curl --fail http://localhost:${PORT:-8501}/_stcore/health || exit 1'
 
 # Run Streamlit using startup script (handles PORT env var)
 CMD ["./start.sh"]

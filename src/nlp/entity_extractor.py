@@ -108,6 +108,10 @@ class EntityExtractor:
 
         try:
             client = get_llm_client()
+            if not client:
+                logger.warning("LLM client not configured. Falling back to spacy extraction.")
+                return self.extract_entities_spacy(text)
+            
             response = client.chat.completions.create(
                 model=LLM_MODEL,
                 messages=[
@@ -117,18 +121,45 @@ class EntityExtractor:
                 response_format={"type": "json_object"}
             )
             import json
-            return json.loads(response.choices[0].message.content)
+            result = json.loads(response.choices[0].message.content)
+            if not isinstance(result, dict):
+                logger.error(f"LLM returned non-dict JSON: {type(result)}")
+                return self.extract_entities_spacy(text)
+            return result
+        except json.JSONDecodeError as e:
+            logger.error(f"LLM Entity Extraction - JSON decode error: {e}")
+            return self.extract_entities_spacy(text)
+        except KeyError as e:
+            logger.error(f"LLM Entity Extraction - Key error accessing response: {e}")
+            return self.extract_entities_spacy(text)
         except Exception as e:
-            print(f"LLM Entity Extraction error: {e}")
+            logger.error(f"LLM Entity Extraction error: {e}")
             return self.extract_entities_spacy(text)
 
     def extract(self, text: str) -> Dict[str, Any]:
         """Main extraction method."""
-        spacy_ents = self.extract_entities_spacy(text)
-        llm_ents = self.extract_entities_llm(text)
-        
-        # Merge results - prefer LLM for structure
-        return {
-            "spacy_entities": spacy_ents,
-            "structured_data": llm_ents
-        }
+        try:
+            spacy_ents = self.extract_entities_spacy(text)
+            llm_ents = self.extract_entities_llm(text)
+            
+            # Ensure llm_ents is a dict
+            if not isinstance(llm_ents, dict):
+                logger.warning(f"LLM extraction returned non-dict type: {type(llm_ents)}")
+                llm_ents = {}
+            
+            # Merge results - prefer LLM for structure
+            return {
+                "spacy_entities": spacy_ents,
+                "structured_data": llm_ents or {}
+            }
+        except Exception as e:
+            logger.error(f"Entity extraction failed: {e}")
+            return {
+                "spacy_entities": {
+                    "Parties": [],
+                    "Dates": [],
+                    "Monetary Amounts": [],
+                    "Jurisdictions": []
+                },
+                "structured_data": {}
+            }

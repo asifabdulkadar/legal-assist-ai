@@ -2,22 +2,62 @@ import spacy
 import re
 import subprocess
 import sys
+import logging
 from typing import Dict, List, Any
 from src.config import LLM_API_KEY, LLM_MODEL, get_llm_client
+
+logger = logging.getLogger(__name__)
+
+# Global cache for spacy model to avoid repeated load attempts
+_spacy_model = None
+_spacy_load_attempted = False
 
 class EntityExtractor:
     """Extracts key legal entities from contract text."""
     
     def __init__(self):
+        global _spacy_model, _spacy_load_attempted
+        
+        self.nlp = None
+        
+        # Use cached result if already attempted
+        if _spacy_load_attempted:
+            self.nlp = _spacy_model
+            return
+        
         try:
             self.nlp = spacy.load("en_core_web_lg")
-        except Exception:
-            # Fallback if model not downloaded in this environment
-            subprocess.check_call([sys.executable, "-m", "spacy", "download", "en_core_web_lg"])
-            self.nlp = spacy.load("en_core_web_lg")
+            _spacy_model = self.nlp
+            _spacy_load_attempted = True
+        except OSError:
+            logger.warning("en_core_web_lg not found. Attempting to download...")
+            try:
+                subprocess.run(
+                    [sys.executable, "-m", "spacy", "download", "en_core_web_lg"],
+                    check=True,
+                    capture_output=True,
+                    timeout=300
+                )
+                self.nlp = spacy.load("en_core_web_lg")
+                _spacy_model = self.nlp
+            except Exception as e:
+                logger.error(f"Failed to download/load spacy model: {e}. Using LLM extraction only.")
+                self.nlp = None
+            finally:
+                _spacy_load_attempted = True
+                _spacy_model = self.nlp
 
     def extract_entities_spacy(self, text: str) -> Dict[str, List[str]]:
         """Extracts organizations, dates, and amounts using spaCy."""
+        if not self.nlp:
+            # Return empty if model unavailable
+            return {
+                "Parties": [],
+                "Dates": [],
+                "Monetary Amounts": [],
+                "Jurisdictions": []
+            }
+        
         # Process first 100k chars for performance
         doc = self.nlp(text[:100000])
         

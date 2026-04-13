@@ -1,5 +1,6 @@
 streamlit
 spacy
+en-core-web-lg==3.7.1
 nltk
 pypdf2
 pdfplumber

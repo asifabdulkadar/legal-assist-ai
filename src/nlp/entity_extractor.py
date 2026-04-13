@@ -1,8 +1,9 @@
 import spacy
 import re
+import subprocess
+import sys
 from typing import Dict, List, Any
-from src.config import OPENAI_API_KEY, LLM_MODEL
-import openai
+from src.config import LLM_API_KEY, LLM_MODEL, get_llm_client
 
 class EntityExtractor:
     """Extracts key legal entities from contract text."""
@@ -10,10 +11,9 @@ class EntityExtractor:
     def __init__(self):
         try:
             self.nlp = spacy.load("en_core_web_lg")
-        except:
-            # Fallback if model not downloaded
-            import os
-            os.system("python -m spacy download en_core_web_lg")
+        except Exception:
+            # Fallback if model not downloaded in this environment
+            subprocess.check_call([sys.executable, "-m", "spacy", "download", "en_core_web_lg"])
             self.nlp = spacy.load("en_core_web_lg")
 
     def extract_entities_spacy(self, text: str) -> Dict[str, List[str]]:
@@ -46,7 +46,7 @@ class EntityExtractor:
 
     def extract_entities_llm(self, text: str) -> Dict[str, Any]:
         """Extracts key structured data using LLM for higher precision."""
-        if not OPENAI_API_KEY:
+        if not LLM_API_KEY:
             return self.extract_entities_spacy(text)
 
         # Use first 3000 chars - usually contains parties and basic terms
@@ -67,7 +67,7 @@ class EntityExtractor:
         """
 
         try:
-            client = openai.OpenAI(api_key=OPENAI_API_KEY)
+            client = get_llm_client()
             response = client.chat.completions.create(
                 model=LLM_MODEL,
                 messages=[

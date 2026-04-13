@@ -1,17 +1,15 @@
-import openai
 from typing import Dict, Any, List
-from src.config import OPENAI_API_KEY, LLM_MODEL
+from src.config import LLM_API_KEY, LLM_MODEL, get_llm_client
 
 class ClauseAnalyzer:
     """Analyzes individual clauses for rights, obligations, and prohibitions."""
     
     def __init__(self):
-        if OPENAI_API_KEY:
-            openai.api_key = OPENAI_API_KEY
+        pass
 
     def analyze_clause(self, clause_text: str) -> Dict[str, Any]:
         """Analyzes a clause to determine if it's an obligation, right, or prohibition."""
-        if not OPENAI_API_KEY:
+        if not LLM_API_KEY:
             return self._analyze_heuristic(clause_text)
 
         prompt = f"""
@@ -25,7 +23,7 @@ class ClauseAnalyzer:
         """
 
         try:
-            client = openai.OpenAI(api_key=OPENAI_API_KEY)
+            client = get_llm_client()
             response = client.chat.completions.create(
                 model=LLM_MODEL,
                 messages=[

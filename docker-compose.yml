@@ -7,8 +7,8 @@ services:
     ports:
       - "8501:8501"
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - LLM_MODEL=${LLM_MODEL:-gpt-4}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
     volumes:
       # Persist data and logs
       - ./data:/app/data

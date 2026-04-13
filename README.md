@@ -25,7 +25,7 @@ LegalAssist AI provides an end-to-end contract intelligence layer:
 ## 🛠️ Technical Architecture & Stack
 
 - **Web UI**: Streamlit (Responsive and interactive dashboard)
-- **Language Models**: OpenAI GPT-4 (Legal reasoning, simplification, and entity extraction)
+- **Language Models**: OpenRouter-compatible LLMs (Legal reasoning, simplification, and entity extraction)
 - **NLP Pipeline**: spaCy (`en_core_web_lg`) & NLTK (Preprocessing, NER, and text segmentation)
 - **Multilingual Support**: Google Translate API (`googletrans`) for Hindi-to-English normalization.
 - **Document Processing**: `pdfplumber` (High-fidelity PDF parsing) and `python-docx`.
@@ -64,7 +64,8 @@ LegalAssist AI provides an end-to-end contract intelligence layer:
 4. **Environment Variables**:
    Create a `.env` file and add:
    ```env
-   OPENAI_API_KEY=your_openai_api_key
+   OPENROUTER_API_KEY=your_openrouter_api_key_here
+   LLM_MODEL=gpt-4o-mini
    ```
 
 ---
@@ -86,15 +87,16 @@ This application is deployment-ready and can be deployed to various platforms. T
 ### Prerequisites
 
 - GitHub repository (for cloud deployments)
-- OpenAI API key
+- OpenRouter API key
 - Python 3.11+ (for local deployments)
 
 ### Environment Variables
 
 Create a `.env` file or set these environment variables in your deployment platform:
 ```env
-OPENAI_API_KEY=your_openai_api_key_here
-LLM_MODEL=gpt-4  # Optional, defaults to gpt-4
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+OPENROUTER_API_BASE=https://openrouter.ai/v1
+LLM_MODEL=gpt-4o-mini  # Optional, defaults to gpt-4o-mini when using OpenRouter
 ```
 
 ---
@@ -113,8 +115,9 @@ Railway automatically detects the Dockerfile and deploys your application.
 4. Select your repository.
 5. Railway will automatically detect the Dockerfile and start building.
 6. Go to "Variables" tab and add:
-   - `OPENAI_API_KEY` = your OpenAI API key.
-   - `LLM_MODEL` = gpt-4 (optional).
+   - `OPENROUTER_API_KEY` = your OpenRouter API key.
+   - `OPENROUTER_API_BASE` = https://openrouter.ai/v1
+   - `LLM_MODEL` = gpt-4o-mini (optional).
 7. Your app will be live at `https://your-app-name.up.railway.app`.
 
 **Notes:**
@@ -131,8 +134,9 @@ Railway automatically detects the Dockerfile and deploys your application.
 4. Connect your GitHub repository.
 5. Render will automatically detect `render.yaml` configuration.
 6. Add environment variables:
-   - `OPENAI_API_KEY` = your OpenAI API key.
-   - `LLM_MODEL` = gpt-4 (optional).
+   - `OPENROUTER_API_KEY` = your OpenRouter API key.
+   - `OPENROUTER_API_BASE` = https://openrouter.ai/v1
+   - `LLM_MODEL` = gpt-4o-mini (optional).
 7. Click "Create Web Service".
 8. Your app will be live at `https://your-app-name.onrender.com`.
 
@@ -151,8 +155,9 @@ Railway automatically detects the Dockerfile and deploys your application.
 6. Set Main file path to `app.py`.
 7. Click "Advanced settings" and add secrets:
    ```env
-   OPENAI_API_KEY=your_openai_api_key
-   LLM_MODEL=gpt-4
+   OPENROUTER_API_KEY=your_openrouter_api_key
+   OPENROUTER_API_BASE=https://openrouter.ai/v1
+   LLM_MODEL=gpt-4o-mini
    ```
 8. Click "Deploy".
 9. Your app will be live at `https://your-app-name.streamlit.app`.
@@ -165,8 +170,9 @@ Railway automatically detects the Dockerfile and deploys your application.
 
 1. Create a `.env` file in the project root:
    ```env
-   OPENAI_API_KEY=your_openai_api_key
-   LLM_MODEL=gpt-4
+   OPENROUTER_API_KEY=your_openrouter_api_key
+   OPENROUTER_API_BASE=https://openrouter.ai/v1
+   LLM_MODEL=gpt-4o-mini
    ```
 
 2. Run the application:
@@ -194,8 +200,9 @@ Railway automatically detects the Dockerfile and deploys your application.
    ```bash
    docker run -d \
      -p 8501:8501 \
-     -e OPENAI_API_KEY=your_openai_api_key \
-     -e LLM_MODEL=gpt-4 \
+     -e OPENROUTER_API_KEY=your_openrouter_api_key \
+     -e OPENROUTER_API_BASE=https://openrouter.ai/v1 \
+     -e LLM_MODEL=gpt-4o-mini \
      -v $(pwd)/data:/app/data \
      -v $(pwd)/logs:/app/logs \
      --name legal-assist-ai \
@@ -229,7 +236,7 @@ Railway automatically detects the Dockerfile and deploys your application.
 
 5. **502 Bad Gateway errors:**
    - Check logs for startup errors.
-   - Ensure `OPENAI_API_KEY` is set correctly.
+   - Ensure `OPENROUTER_API_KEY` is set correctly.
    - Verify the application is starting correctly.
 
 6. **Build timeouts:**

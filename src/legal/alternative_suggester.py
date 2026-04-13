@@ -1,6 +1,5 @@
-import openai
 from typing import List, Dict, Any
-from src.config import OPENAI_API_KEY, LLM_MODEL
+from src.config import LLM_API_KEY, LLM_MODEL, get_llm_client
 
 class AlternativeSuggester:
     """Suggests alternative, more favorable wordings for high-risk clauses."""
@@ -10,7 +9,7 @@ class AlternativeSuggester:
 
     def suggest_alternative(self, original_clause: str, risks: List[str]) -> Dict[str, Any]:
         """Generates a more SME-friendly alternative using LLM."""
-        if not OPENAI_API_KEY:
+        if not LLM_API_KEY:
             return {
                 "alternative": "Suggestion requires LLM access.",
                 "explanation": "Consult a legal professional for alternative wording."
@@ -26,7 +25,7 @@ class AlternativeSuggester:
         """
 
         try:
-            client = openai.OpenAI(api_key=OPENAI_API_KEY)
+            client = get_llm_client()
             response = client.chat.completions.create(
                 model=LLM_MODEL,
                 messages=[

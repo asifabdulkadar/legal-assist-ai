@@ -1,7 +1,6 @@
 import re
-import openai
 from typing import Optional
-from src.config import CONTRACT_TYPES, OPENAI_API_KEY, LLM_MODEL
+from src.config import CONTRACT_TYPES, LLM_API_KEY, LLM_MODEL, get_llm_client
 
 class ContractClassifier:
     """Classifies the type of contract from its text."""
@@ -16,8 +15,7 @@ class ContractClassifier:
     }
 
     def __init__(self):
-        if OPENAI_API_KEY:
-            openai.api_key = OPENAI_API_KEY
+        pass
 
     def classify_heuristic(self, text: str) -> Optional[str]:
         """Classifies contract using keyword matching."""
@@ -36,7 +34,7 @@ class ContractClassifier:
 
     def classify_llm(self, text: str) -> str:
         """Classifies contract using LLM for higher accuracy."""
-        if not OPENAI_API_KEY:
+        if not LLM_API_KEY:
             return self.classify_heuristic(text) or "General Agreement"
 
         # Use only first 2000 chars for classification to save tokens
@@ -53,7 +51,7 @@ class ContractClassifier:
         Result:"""
 
         try:
-            client = openai.OpenAI(api_key=OPENAI_API_KEY)
+            client = get_llm_client()
             response = client.chat.completions.create(
                 model=LLM_MODEL,
                 messages=[

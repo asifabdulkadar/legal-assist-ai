@@ -1,7 +1,6 @@
 import re
 from typing import List, Dict, Any
-from src.config import OPENAI_API_KEY, LLM_MODEL
-import openai
+from src.config import LLM_API_KEY, LLM_MODEL, get_llm_client
 
 class AmbiguityDetector:
     """Detects vague or ambiguous language in contract clauses."""
@@ -27,7 +26,7 @@ class AmbiguityDetector:
 
     def detect_ambiguities_llm(self, text: str) -> List[Dict[str, str]]:
         """Uses LLM to detect more complex semantic ambiguities."""
-        if not OPENAI_API_KEY:
+        if not LLM_API_KEY:
             terms = self.detect_ambiguities_heuristic(text)
             return [{"term": t, "reason": "Common vague term used in legal context."} for t in terms]
 
@@ -42,7 +41,7 @@ class AmbiguityDetector:
         """
 
         try:
-            client = openai.OpenAI(api_key=OPENAI_API_KEY)
+            client = get_llm_client()
             response = client.chat.completions.create(
                 model=LLM_MODEL,
                 messages=[

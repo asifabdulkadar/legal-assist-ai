@@ -1,6 +1,5 @@
-import openai
 from typing import List, Dict, Any
-from src.config import OPENAI_API_KEY, LLM_MODEL
+from src.config import LLM_API_KEY, LLM_MODEL, get_llm_client
 
 class ComplianceChecker:
     """Checks contract compliance with general Indian business law principles."""
@@ -10,7 +9,7 @@ class ComplianceChecker:
 
     def check_compliance(self, contract_type: str, text: str) -> List[Dict[str, Any]]:
         """Identifies potential compliance issues based on common Indian laws."""
-        if not OPENAI_API_KEY:
+        if not LLM_API_KEY:
             return self._heuristic_check(contract_type, text)
 
         prompt = f"""
@@ -24,7 +23,7 @@ class ComplianceChecker:
         """
 
         try:
-            client = openai.OpenAI(api_key=OPENAI_API_KEY)
+            client = get_llm_client()
             response = client.chat.completions.create(
                 model=LLM_MODEL,
                 messages=[

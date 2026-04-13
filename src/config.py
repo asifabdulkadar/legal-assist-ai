@@ -1,14 +1,29 @@
 import os
 from dotenv import load_dotenv
+import openai
 
 # Load environment variables
 load_dotenv()
 
 # API Keys
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+LLM_API_KEY = OPENROUTER_API_KEY or OPENAI_API_KEY
+OPENROUTER_API_BASE = os.getenv("OPENROUTER_API_BASE", "https://openrouter.ai/v1") if OPENROUTER_API_KEY else None
 
 # Model Configuration
-LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4")
+LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini" if OPENROUTER_API_KEY else "gpt-4")
+
+
+def get_llm_client():
+    """Return a configured OpenAI/OpenRouter client or None if no API key is set."""
+    if not LLM_API_KEY:
+        return None
+
+    client_kwargs = {"api_key": LLM_API_KEY}
+    if OPENROUTER_API_BASE:
+        client_kwargs["api_base"] = OPENROUTER_API_BASE
+    return openai.OpenAI(**client_kwargs)
 
 # Path Configuration
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
